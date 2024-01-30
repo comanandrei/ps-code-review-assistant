@@ -1,0 +1,16 @@
+name: "PS AI Review Assistant"
+description: "PS AI Review Assistant is a GitHub Action designed to enhance code quality and review efficiency in your organization. Utilizing the advanced capabilities of Public Sapience's AI chatbot, this tool automatically reviews and provides insightful feedback on pull requests. It streamlines the code review process, ensures consistency across projects, and assists developers in maintaining best practices. Ideal for teams seeking to leverage AI for improved code analysis and productivity within the PS ecosystem."
+inputs:
+  GITHUB_TOKEN:
+    description: "GitHub token to interact with the repository."
+    required: true
+  PS_CHAT_TOKEN:
+    description: "PS Chatbot API token for using the PS-Chat."
+    required: true
+  exclude:
+    description: "Glob patterns to exclude files from the diff analysis"
+    required: false
+    default: ""
+runs:
+  using: "node20"
+  main: "dist/index.js"

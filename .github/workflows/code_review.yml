@@ -1,0 +1,21 @@
+name: PS AI Review Assistant
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+permissions: write-all
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: PS Code Review Assistant
+        uses: PublicisSapient/ps-code-review-assistant@main # This action is currently hosted in a personal repository.
+                                                            # It will be migrated to the official PS organization repository in the future.
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # The GITHUB_TOKEN is there by default so you just need to keep it like it is and not necessarily need to add it as secret as it will throw an error. [More Details](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret)
+          PS_CHAT_TOKEN: ${{ secrets.PS_CHAT_TOKEN }}
+          exclude: "**/*.json, **/*.md" # Optional: exclude patterns separated by commas
