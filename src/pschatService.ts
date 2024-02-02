@@ -23,7 +23,7 @@ export async function getPSChatbotResponse(prompt: string) {
       message: prompt,
       async: true,
       options: {
-        model: "gpt35turbo",
+        model: "gtp4",
         assistant: "Assistant",
         contexts: [],
         parameters: {

@@ -84,6 +84,7 @@ async function main() {
   const eventData = JSON.parse(
     readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8"),
   );
+  console.log('====process.env.GITHUB_EVENT_PATH', process.env.GITHUB_EVENT_PATH);
   console.log("====pullRequest", pullRequestData);
   console.log("====eventData", eventData);
   if (eventData.action === "opened") {

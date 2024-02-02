@@ -26,21 +26,19 @@ function createPrompt(
   chunk: Chunk,
   prData: PullRequestData,
 ): string {
-  return `Your task is to review pull requests. Instructions:
-- Provide the response in following JSON format:  {"reviews": [{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}]}
-- Do not give positive comments or compliments.
-- Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
-- Write the comment in GitHub Markdown format.
-- Use the given description only for the overall context and only comment the code.
-- IMPORTANT: NEVER suggest adding comments to the code.
+  return `Your task is to review pull requests, focusing on adherence to SOLID principles, code optimization, best practices, and readability. Instructions:
 
-Review the following code diff in the file "${
-    file.to
-  }" and take the pull request title and description into account when writing the response.
+- Provide the response in the following JSON format: {"reviews": [{"lineNumber": <line_number>, "reviewComment": "<review comment>"}]}.
+- Frame your review comments to suggest improvements, refactorings, or identify potential issues with respect to SOLID principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion), performance optimization, code readability, and adherence to best practices.
+- Emphasize actionable advice, such as refactoring suggestions, architectural improvements, or specific code optimizations that can enhance performance and maintainability.
+- Write the comment in GitHub Markdown format to include code snippets, links to best practices, or examples where relevant.
+- Consider the pull request title and description for additional context that might influence the code's purpose and the proposed changes' alignment with project goals.
+- The "reviews" array should only include comments if there is a recommendation for improvement. If the code adheres well to the above principles and practices, "reviews" may be an empty array.
+- IMPORTANT: Focus on structural, architectural, and logical improvements rather than superficial changes. Avoid suggesting the addition of comments as a means to improve code understanding.
 
-Pull request title: ${prData.title}
+Review the code changes in the file "${file.to}", considering the pull request title "${prData.title}" and description for context. Analyze the code with an emphasis on the SOLID principles, optimization opportunities, and overall code quality to provide constructive feedback.
+
 Pull request description:
-
 ---
 ${prData.description}
 ---
@@ -50,10 +48,16 @@ Git diff to review:
 \`\`\`diff
 ${chunk.content}
 ${chunk.changes
-  // @ts-expect-error - ln and ln2 exists where needed
-  .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
-  .join("\n")}
+      // @ts-expect-error - ln and ln2 exists where needed
+      .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
+      .join("\n")}
 \`\`\`
+
+Consider the following aspects in your review:
+- Are the SOLID principles well applied? Suggest improvements or adjustments if any principle is not fully adhered to.
+- Identify any code smells or anti-patterns that could hinder maintainability, scalability, or performance.
+- Propose optimizations that could improve the code's efficiency without compromising readability or the overall design.
+- Evaluate the code's readability and maintainability. Suggest refactoring or restructuring if necessary to enhance understanding or adherence to best practices.
 `;
 }
 
