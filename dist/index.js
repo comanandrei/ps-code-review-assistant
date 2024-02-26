@@ -338,7 +338,7 @@ const axios_1 = __nccwpck_require__(4842);
 const qId_loop_1 = __importDefault(__nccwpck_require__(7831));
 const config_1 = __nccwpck_require__(1234);
 function getPSChatbotResponse(prompt) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const requestData = {
@@ -356,10 +356,11 @@ function getPSChatbotResponse(prompt) {
                 },
             };
             const response = yield axios_1.axiosApi.post(`${config_1.URL}/api/chat`, requestData);
-            if ((_a = response.data) === null || _a === void 0 ? void 0 : _a.qid) {
+            console.log("====response QID", (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.qid);
+            if ((_b = response.data) === null || _b === void 0 ? void 0 : _b.qid) {
                 const messages = yield (0, qId_loop_1.default)(response.data.qid);
                 console.log("====messages", messages);
-                const messageContent = (_d = (_c = (_b = messages[1]) === null || _b === void 0 ? void 0 : _b.content) === null || _c === void 0 ? void 0 : _c.trim()) !== null && _d !== void 0 ? _d : "{}";
+                const messageContent = (_e = (_d = (_c = messages[1]) === null || _c === void 0 ? void 0 : _c.content) === null || _d === void 0 ? void 0 : _d.trim()) !== null && _e !== void 0 ? _e : "{}";
                 return JSON.parse(messageContent).reviews;
             }
         }

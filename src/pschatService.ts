@@ -35,7 +35,7 @@ export async function getPSChatbotResponse(prompt: string) {
     };
 
     const response = await axiosApi.post(`${URL}/api/chat`, requestData);
-
+    console.log("====response QID", response?.data?.qid);
     if (response.data?.qid) {
       const messages = await getQ(response.data.qid);
       console.log("====messages", messages);
