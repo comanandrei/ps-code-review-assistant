@@ -1,6 +1,7 @@
 import { Chunk, File } from "parse-diff";
 import { PullRequestData } from "./types";
 import { getPSChatbotResponse } from "./pschatService";
+import { PROMPT } from "./config";
 
 export default async function analyzeCode(
   filteredDiff: File[],
@@ -48,16 +49,12 @@ Git diff to review:
 \`\`\`diff
 ${chunk.content}
 ${chunk.changes
-      // @ts-expect-error - ln and ln2 exists where needed
-      .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
-      .join("\n")}
+  // @ts-expect-error - ln and ln2 exists where needed
+  .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
+  .join("\n")}
 \`\`\`
 
-Consider the following aspects in your review:
-- Are the SOLID principles well applied? Suggest improvements or adjustments if any principle is not fully adhered to.
-- Identify any code smells or anti-patterns that could hinder maintainability, scalability, or performance.
-- Propose optimizations that could improve the code's efficiency without compromising readability or the overall design.
-- Evaluate the code's readability and maintainability. Suggest refactoring or restructuring if necessary to enhance understanding or adherence to best practices.
+Here are the tools/framework/libraries that are used in the project: ${PROMPT}
 `;
 }
 

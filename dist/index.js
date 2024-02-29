@@ -17,6 +17,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const pschatService_1 = __nccwpck_require__(2054);
+const config_1 = __nccwpck_require__(1234);
 function analyzeCode(filteredDiff, prData) {
     return __awaiter(this, void 0, void 0, function* () {
         const comments = [];
@@ -64,11 +65,7 @@ ${chunk.changes
         .join("\n")}
 \`\`\`
 
-Consider the following aspects in your review:
-- Are the SOLID principles well applied? Suggest improvements or adjustments if any principle is not fully adhered to.
-- Identify any code smells or anti-patterns that could hinder maintainability, scalability, or performance.
-- Propose optimizations that could improve the code's efficiency without compromising readability or the overall design.
-- Evaluate the code's readability and maintainability. Suggest refactoring or restructuring if necessary to enhance understanding or adherence to best practices.
+Here are the tools/framework/libraries that are used in the project: ${config_1.PROMPT}
 `;
 }
 function createComment(file, psChatResponse) {
@@ -137,10 +134,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.URL = exports.PS_CHAT_TOKEN = exports.GITHUB_TOKEN = void 0;
+exports.URL = exports.EXCLUDE = exports.PROMPT = exports.PS_CHAT_TOKEN = exports.GITHUB_TOKEN = void 0;
 const core = __importStar(__nccwpck_require__(6733));
 exports.GITHUB_TOKEN = core.getInput("GITHUB_TOKEN");
 exports.PS_CHAT_TOKEN = core.getInput("PS_CHAT_TOKEN");
+exports.PROMPT = core.getInput("prompt");
+exports.EXCLUDE = core.getInput("exclude");
 exports.URL = "https://api.psnext.info";
 
 
@@ -151,29 +150,6 @@ exports.URL = "https://api.psnext.info";
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -189,7 +165,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPullRequestDiff = exports.getPullRequest = void 0;
 const fs_1 = __nccwpck_require__(7147);
-const core = __importStar(__nccwpck_require__(6733));
 const rest_1 = __nccwpck_require__(6326);
 const parse_diff_1 = __importDefault(__nccwpck_require__(2347));
 const minimatch_1 = __importDefault(__nccwpck_require__(2868));
@@ -258,7 +233,7 @@ function main() {
         let diff;
         // JSON file that contains information about the event that triggered the workflow. This file typically includes details about a pull request, push, issue, or other GitHub-related events.
         const eventData = JSON.parse((0, fs_1.readFileSync)((_a = process.env.GITHUB_EVENT_PATH) !== null && _a !== void 0 ? _a : "", "utf8"));
-        console.log('====process.env.GITHUB_EVENT_PATH', process.env.GITHUB_EVENT_PATH);
+        console.log("====process.env.GITHUB_EVENT_PATH", process.env.GITHUB_EVENT_PATH);
         console.log("====pullRequest", pullRequestData);
         console.log("====eventData", eventData);
         if (eventData.action === "opened") {
@@ -291,10 +266,7 @@ function main() {
         const parsedDiff = (0, parse_diff_1.default)(diff);
         console.log("====parsedDiff", parsedDiff);
         // Gets a string of comma-separated patterns from the action's input (defined in the workflow YAML).
-        const excludePatterns = core
-            .getInput("exclude")
-            .split(",")
-            .map((s) => s.trim());
+        const excludePatterns = config_1.EXCLUDE.split(",").map((s) => s.trim());
         const filteredDiff = parsedDiff.filter((file) => {
             return !excludePatterns.some((pattern) => { var _a; return (0, minimatch_1.default)((_a = file.to) !== null && _a !== void 0 ? _a : "", pattern); });
         });
@@ -304,7 +276,7 @@ function main() {
         if (comments.length > 0) {
             yield postPullRequestReview(pullRequestData.owner, pullRequestData.repo, pullRequestData.pull_number, comments);
         }
-        console.log('======= end ===========');
+        console.log("======= end ===========");
     });
 }
 main().catch((error) => {
@@ -345,7 +317,7 @@ function getPSChatbotResponse(prompt) {
                 message: prompt,
                 async: true,
                 options: {
-                    model: "gpt35turbo",
+                    model: "gtp4",
                     assistant: "Assistant",
                     contexts: [],
                     parameters: {
@@ -11417,7 +11389,7 @@ function _typeof(obj){"@babel/helpers - typeof";return _typeof="function"==typeo
 
 /***/ }),
 
-/***/ 5088:
+/***/ 2170:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -12180,7 +12152,7 @@ const mockErrors = __nccwpck_require__(2097)
 const ProxyAgent = __nccwpck_require__(5471)
 const RetryHandler = __nccwpck_require__(6096)
 const { getGlobalDispatcher, setGlobalDispatcher } = __nccwpck_require__(1109)
-const DecoratorHandler = __nccwpck_require__(2170)
+const DecoratorHandler = __nccwpck_require__(8468)
 const RedirectHandler = __nccwpck_require__(4857)
 const createRedirectInterceptor = __nccwpck_require__(7297)
 
@@ -29359,7 +29331,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 2170:
+/***/ 8468:
 /***/ ((module) => {
 
 "use strict";
@@ -40192,7 +40164,7 @@ exports.unescape = unescape;
 
 const FormData$1 = __nccwpck_require__(6872);
 const url = __nccwpck_require__(7310);
-const proxyFromEnv = __nccwpck_require__(5088);
+const proxyFromEnv = __nccwpck_require__(2170);
 const http = __nccwpck_require__(3685);
 const https = __nccwpck_require__(5687);
 const util = __nccwpck_require__(3837);

@@ -5,7 +5,7 @@ import parseDiff from "parse-diff";
 import minimatch from "minimatch";
 import { PullRequestData } from "./types";
 import analyzeCode from "./analyzeCode";
-import { GITHUB_TOKEN } from "./config";
+import { EXCLUDE, GITHUB_TOKEN } from "./config";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 export async function getPullRequest(): Promise<PullRequestData> {
@@ -84,7 +84,10 @@ async function main() {
   const eventData = JSON.parse(
     readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8"),
   );
-  console.log('====process.env.GITHUB_EVENT_PATH', process.env.GITHUB_EVENT_PATH);
+  console.log(
+    "====process.env.GITHUB_EVENT_PATH",
+    process.env.GITHUB_EVENT_PATH,
+  );
   console.log("====pullRequest", pullRequestData);
   console.log("====eventData", eventData);
   if (eventData.action === "opened") {
@@ -121,10 +124,7 @@ async function main() {
   const parsedDiff = parseDiff(diff);
   console.log("====parsedDiff", parsedDiff);
   // Gets a string of comma-separated patterns from the action's input (defined in the workflow YAML).
-  const excludePatterns = core
-    .getInput("exclude")
-    .split(",")
-    .map((s) => s.trim());
+  const excludePatterns = EXCLUDE.split(",").map((s) => s.trim());
 
   const filteredDiff = parsedDiff.filter((file) => {
     return !excludePatterns.some((pattern) =>
@@ -142,7 +142,7 @@ async function main() {
       comments,
     );
   }
-  console.log('======= end ===========');
+  console.log("======= end ===========");
 }
 main().catch((error) => {
   console.error("Error:", error);

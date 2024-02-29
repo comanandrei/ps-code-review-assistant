@@ -7,6 +7,10 @@ inputs:
   PS_CHAT_TOKEN:
     description: "PS Chatbot API token for using the PS-Chat."
     required: true
+  prompt:
+    description: "Define the tools, languages, frameworks, and libraries used in the project to help the AI understand better the context and give a more accurate output."
+    required: false
+    default: ""
   exclude:
     description: "Glob patterns to exclude files from the diff analysis"
     required: false
