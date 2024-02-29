@@ -318,7 +318,7 @@ function getPSChatbotResponse(prompt) {
                 async: true,
                 options: {
                     model: "gpt35turbo",
-                    assistant: "Assistant",
+                    assistant: "AI Reviewer",
                     contexts: [],
                     parameters: {
                         max_tokens: 1000,
