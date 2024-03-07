@@ -40,7 +40,7 @@ export async function getPSChatbotResponse(prompt: string) {
       const messages = await getQ(response.data.qid);
       console.log("====messages", messages);
       const messageContent = messages[1]?.content?.trim() ?? "{}";
-      return JSON.parse(messageContent).reviews;
+      return JSON.parse(messageContent)?.reviews;
     }
   } catch (error) {
     console.error("Error in getPSChatbotResponse:", error);
