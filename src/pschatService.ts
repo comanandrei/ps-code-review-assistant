@@ -44,6 +44,6 @@ export async function getPSChatbotResponse(prompt: string) {
     }
   } catch (error) {
     console.error("Error in getPSChatbotResponse:", error);
-    throw error; // Allow for further handling upstream
+    throw error;
   }
 }

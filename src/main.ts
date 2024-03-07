@@ -8,6 +8,14 @@ import analyzeCode from "./analyzeCode";
 import { EXCLUDE, GITHUB_TOKEN } from "./config";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+// JSON file that contains information about the event that triggered the workflow. This file typically includes details about a pull request, push, issue, or other GitHub-related events.
+const eventData = JSON.parse(
+  readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8"),
+);
+
+console.log("====process.env.GITHUB_EVENT_PATH", process.env.GITHUB_EVENT_PATH);
+
 export async function getPullRequest(): Promise<PullRequestData> {
   // Destructure necessary properties from the event JSON
   const {
@@ -16,7 +24,7 @@ export async function getPullRequest(): Promise<PullRequestData> {
       name: repo,
     },
     number,
-  } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8"));
+  } = eventData;
 
   // Fetch pull request details from GitHub
   const {
@@ -81,15 +89,8 @@ async function main() {
   const pullRequestData = await getPullRequest();
   let diff: string | null;
   // JSON file that contains information about the event that triggered the workflow. This file typically includes details about a pull request, push, issue, or other GitHub-related events.
-  const eventData = JSON.parse(
-    readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8"),
-  );
-  console.log(
-    "====process.env.GITHUB_EVENT_PATH",
-    process.env.GITHUB_EVENT_PATH,
-  );
+
   console.log("====pullRequest", pullRequestData);
-  console.log("====eventData", eventData);
   if (eventData.action === "opened") {
     diff = await getPullRequestDiff(
       pullRequestData.owner,
@@ -110,10 +111,9 @@ async function main() {
       head: newHeadSha,
     });
     console.log("====compareCommits", JSON.stringify(response.data));
-    diff = String(response.data);
+    diff = response.data as unknown as string;
   } else {
-    console.log("Unsupported event:", process.env.GITHUB_EVENT_NAME);
-    return;
+    throw `Unsupported event: ${process.env.GITHUB_EVENT_NAME}`;
   }
 
   if (!diff) {
@@ -123,6 +123,7 @@ async function main() {
   console.log("====diff", diff);
   const parsedDiff = parseDiff(diff);
   console.log("====parsedDiff", parsedDiff);
+
   // Gets a string of comma-separated patterns from the action's input (defined in the workflow YAML).
   const excludePatterns = EXCLUDE.split(",").map((s) => s.trim());
 
@@ -131,7 +132,7 @@ async function main() {
       minimatch(file.to ?? "", pattern),
     );
   });
-  console.log("====filteredDiff", filteredDiff);
+
   const comments = await analyzeCode(filteredDiff, pullRequestData);
   console.log("====comments", comments);
   if (comments.length > 0) {
@@ -142,7 +143,6 @@ async function main() {
       comments,
     );
   }
-  console.log("======= end ===========");
 }
 main().catch((error) => {
   console.error("Error:", error);

@@ -27,15 +27,14 @@ function createPrompt(
   chunk: Chunk,
   prData: PullRequestData,
 ): string {
-  return `Your task is to review pull requests, focusing on adherence to SOLID principles, code optimization, best practices, and readability. Instructions:
+  return `Your task is to review pull requests, focusing on adherence to code optimization, best practices, readability, and a constructive feedback. Instructions:
 
 - Provide the response in the following JSON format: {"reviews": [{"lineNumber": <line_number>, "reviewComment": "<review comment>"}]}.
-- Frame your review comments to suggest improvements, refactorings, or identify potential issues with respect to SOLID principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion), performance optimization, code readability, and adherence to best practices.
+- The "reviews" array should only include comments if there is a recommendation for improvement. If the code adheres well to the above principles and practices, "reviews" may be an empty array.
+- Frame your review comments to suggest improvements, refactorings, or identify potential issues with respect to SOLID principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion), performance optimization, and adherence to best practices.
 - Emphasize actionable advice, such as refactoring suggestions, architectural improvements, or specific code optimizations that can enhance performance and maintainability.
 - Write the comment in GitHub Markdown format to include code snippets, links to best practices, or examples where relevant.
 - Consider the pull request title and description for additional context that might influence the code's purpose and the proposed changes' alignment with project goals.
-- The "reviews" array should only include comments if there is a recommendation for improvement. If the code adheres well to the above principles and practices, "reviews" may be an empty array.
-- IMPORTANT: Focus on structural, architectural, and logical improvements rather than superficial changes. Avoid suggesting the addition of comments as a means to improve code understanding.
 
 Review the code changes in the file "${file.to}", considering the pull request title "${prData.title}" and description for context. Analyze the code with an emphasis on the SOLID principles, optimization opportunities, and overall code quality to provide constructive feedback.
 
