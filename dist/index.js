@@ -38,15 +38,14 @@ function analyzeCode(filteredDiff, prData) {
 }
 exports["default"] = analyzeCode;
 function createPrompt(file, chunk, prData) {
-    return `Your task is to review pull requests, focusing on adherence to SOLID principles, code optimization, best practices, and readability. Instructions:
+    return `Your task is to review pull requests, focusing on adherence to code optimization, best practices, readability, and a constructive feedback. Instructions:
 
 - Provide the response in the following JSON format: {"reviews": [{"lineNumber": <line_number>, "reviewComment": "<review comment>"}]}.
-- Frame your review comments to suggest improvements, refactorings, or identify potential issues with respect to SOLID principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion), performance optimization, code readability, and adherence to best practices.
+- The "reviews" array should only include comments if there is a recommendation for improvement. If the code adheres well to the above principles and practices, "reviews" may be an empty array.
+- Frame your review comments to suggest improvements, refactorings, or identify potential issues with respect to SOLID principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion), performance optimization, and adherence to best practices.
 - Emphasize actionable advice, such as refactoring suggestions, architectural improvements, or specific code optimizations that can enhance performance and maintainability.
 - Write the comment in GitHub Markdown format to include code snippets, links to best practices, or examples where relevant.
 - Consider the pull request title and description for additional context that might influence the code's purpose and the proposed changes' alignment with project goals.
-- The "reviews" array should only include comments if there is a recommendation for improvement. If the code adheres well to the above principles and practices, "reviews" may be an empty array.
-- IMPORTANT: Focus on structural, architectural, and logical improvements rather than superficial changes. Avoid suggesting the addition of comments as a means to improve code understanding.
 
 Review the code changes in the file "${file.to}", considering the pull request title "${prData.title}" and description for context. Analyze the code with an emphasis on the SOLID principles, optimization opportunities, and overall code quality to provide constructive feedback.
 
@@ -162,6 +161,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPullRequestDiff = exports.getPullRequest = void 0;
 const fs_1 = __nccwpck_require__(7147);
@@ -171,10 +171,13 @@ const minimatch_1 = __importDefault(__nccwpck_require__(2868));
 const analyzeCode_1 = __importDefault(__nccwpck_require__(4025));
 const config_1 = __nccwpck_require__(1234);
 const octokit = new rest_1.Octokit({ auth: config_1.GITHUB_TOKEN });
+// JSON file that contains information about the event that triggered the workflow. This file typically includes details about a pull request, push, issue, or other GitHub-related events.
+const eventData = JSON.parse((0, fs_1.readFileSync)((_a = process.env.GITHUB_EVENT_PATH) !== null && _a !== void 0 ? _a : "", "utf8"));
+console.log("====process.env.GITHUB_EVENT_PATH", process.env.GITHUB_EVENT_PATH);
 function getPullRequest() {
     return __awaiter(this, void 0, void 0, function* () {
         // Destructure necessary properties from the event JSON
-        const { repository: { owner: { login: owner }, name: repo, }, number, } = JSON.parse((0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH || "", "utf8"));
+        const { repository: { owner: { login: owner }, name: repo, }, number, } = eventData;
         // Fetch pull request details from GitHub
         const { data: { title = "", body = "" }, } = yield octokit.pulls.get({
             owner,
@@ -226,16 +229,12 @@ function postPullRequestReview(owner, repo, pullNumber, reviewComments) {
     });
 }
 function main() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         console.log("=======START=======");
         const pullRequestData = yield getPullRequest();
         let diff;
         // JSON file that contains information about the event that triggered the workflow. This file typically includes details about a pull request, push, issue, or other GitHub-related events.
-        const eventData = JSON.parse((0, fs_1.readFileSync)((_a = process.env.GITHUB_EVENT_PATH) !== null && _a !== void 0 ? _a : "", "utf8"));
-        console.log("====process.env.GITHUB_EVENT_PATH", process.env.GITHUB_EVENT_PATH);
         console.log("====pullRequest", pullRequestData);
-        console.log("====eventData", eventData);
         if (eventData.action === "opened") {
             diff = yield getPullRequestDiff(pullRequestData.owner, pullRequestData.repo, pullRequestData.pull_number);
         }
@@ -252,11 +251,10 @@ function main() {
                 head: newHeadSha,
             });
             console.log("====compareCommits", JSON.stringify(response.data));
-            diff = String(response.data);
+            diff = response.data;
         }
         else {
-            console.log("Unsupported event:", process.env.GITHUB_EVENT_NAME);
-            return;
+            throw `Unsupported event: ${process.env.GITHUB_EVENT_NAME}`;
         }
         if (!diff) {
             console.log("No diff found");
@@ -270,13 +268,11 @@ function main() {
         const filteredDiff = parsedDiff.filter((file) => {
             return !excludePatterns.some((pattern) => { var _a; return (0, minimatch_1.default)((_a = file.to) !== null && _a !== void 0 ? _a : "", pattern); });
         });
-        console.log("====filteredDiff", filteredDiff);
         const comments = yield (0, analyzeCode_1.default)(filteredDiff, pullRequestData);
         console.log("====comments", comments);
         if (comments.length > 0) {
             yield postPullRequestReview(pullRequestData.owner, pullRequestData.repo, pullRequestData.pull_number, comments);
         }
-        console.log("======= end ===========");
     });
 }
 main().catch((error) => {
@@ -338,7 +334,7 @@ function getPSChatbotResponse(prompt) {
         }
         catch (error) {
             console.error("Error in getPSChatbotResponse:", error);
-            throw error; // Allow for further handling upstream
+            throw error;
         }
     });
 }
